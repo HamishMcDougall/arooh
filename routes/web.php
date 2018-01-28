@@ -30,7 +30,16 @@ Route::any('/search',function(){
     else return view ('welcome')->withMessage('No topic found. Would you like to create one for the topic ')->withQuery($q);
 });
 
+Route::post('addTopic', 'TopicsController@store');
 
 
 
 Route::get('topic/{topic}', 'PostsController@index');
+Route::post('addPost', 'PostsController@store');
+
+
+// upvote
+Route::post('/upvote', 'PostsController@upvote');
+
+// downvote
+Route::post('/downvote', 'PostsController@downvote');

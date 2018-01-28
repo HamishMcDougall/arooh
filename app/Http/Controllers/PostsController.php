@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 use App\Posts;
 use App\Topics;
 use Illuminate\Http\Request;
+use Session;
 
 class PostsController extends Controller
 {
@@ -22,7 +24,7 @@ class PostsController extends Controller
       //returns only the topic ID used to search in posts
       $topicCollection_id = DB::table('topics')->where('topic', '=', $topic)->value('id');
       //return all posts with the topic id
-      $posts = DB::table('posts')->where('topic_id', '=', $topicCollection_id)->get();
+      $posts = DB::table('posts')->where('topic_id', '=', $topicCollection_id)->orderBy('votes', 'desc')->get();
         return view('topicPost')->with('posts',$posts)->with('topicCollection',$topicCollection);
 
     }
@@ -34,7 +36,8 @@ class PostsController extends Controller
      */
     public function create()
     {
-        //
+
+
     }
 
     /**
@@ -45,7 +48,25 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+          $currentUserId = Auth::id();
+
+      $postText = $request->TextAnswer;
+      $topic_id = $request->topicId;
+      $createdAt = new \DateTime();
+
+      DB::table('posts')->insert([
+            'post' => $postText,
+            'topic_id' => $topic_id,
+            'votes' => 0,
+            'created_at' => $createdAt,
+            'user_id' => $currentUserId
+        ]);
+
+        return back()->withInput();
+
+
+
     }
 
     /**
@@ -91,5 +112,68 @@ class PostsController extends Controller
     public function destroy(Posts $posts)
     {
         //
+    }
+
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function upvote(Request $request)
+
+    {
+        $updatedAt = new \DateTime();
+
+        $id = $request->postId;
+        $currentVotes = DB::table('posts')->where('id', '=', $id)->value('votes');
+        $newVotetotal = $currentVotes + 1;
+
+        if (Auth::check()) {
+          $newVotesUpdate = DB::table('posts')
+              ->where('id', '=', $id)
+              ->update([
+                'votes' => $newVotetotal,
+                'updated_at' => $updatedAt
+              ]);
+
+              return back()->withInput();
+        }
+
+        $request->session()->flash('alert-warning', 'You must be login in to vote!');
+        return back();
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function downvote(Request $request)
+    {
+
+      $updatedAt = new \DateTime();
+
+      $currentUserId = Auth::id();
+
+      $id = $request->postId;
+      $currentVotes = DB::table('posts')->where('id', '=', $id)->value('votes');
+      $newVotetotal = $currentVotes - 1;
+
+      if (Auth::check()) {
+        $newVotesUpdate = DB::table('posts')
+            ->where('id', '=', $id)
+            ->update([
+              'votes' => $newVotetotal,
+              'updated_at' => $updatedAt
+            ]);
+
+            return back()->withInput();
+      }
+
+      $request->session()->flash('alert-warning', 'You must be login in to vote!');
+      return back();
     }
 }

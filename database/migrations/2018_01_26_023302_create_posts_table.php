@@ -17,6 +17,7 @@ class CreatePostsTable extends Migration
             $table->increments('id');
             $table->timestamps();
             $table->integer('topic_id');
+            $table->integer('user_id');
             $table->text('post');
             $table->integer('votes')->nullable();
 

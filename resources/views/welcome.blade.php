@@ -11,7 +11,9 @@
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
 
         <!-- Styles -->
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        
         <link href="{{ asset('/css/app.css') }}" rel="stylesheet"/>
 
         <style>
@@ -117,6 +119,19 @@
                             @elseif(isset($message))
     			                     <p>{{ $message}}
                               <b> {{ $query }} </b> ?</p>
+
+
+                              <form action="/addTopic" method="POST" role="search">
+                                  {{ csrf_field() }}
+                                  <div class="form-group">
+                                    <input  name="newTopic" type="hidden" value="{{ $query }}">
+                                      <button type="submit" class="btn btn-default">Yes</button>
+                                  </div>
+
+
+
+                                </form>
+
                     @endif
 
                 </div>
